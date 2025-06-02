@@ -1,0 +1,21 @@
+{
+  "dependencies": [
+    {
+      "version": "1.0.1",
+      "assetId": "client-credential-fragment",
+      "groupId": "4272df4c-8e68-4f90-86ff-dbdb04192bf9",
+      "provided": false
+    }
+  ],
+  "version": "1.0.0",
+  "descriptorVersion": "1.0.0",
+  "classifier": "raml",
+  "main": "equifax-report-api.raml",
+  "assetId": "equifax-report-api",
+  "groupId": "4272df4c-8e68-4f90-86ff-dbdb04192bf9",
+  "name": "equifax-report-api",
+  "organizationId": "4272df4c-8e68-4f90-86ff-dbdb04192bf9",
+  "apiVersion": "v1",
+  "tags": [],
+  "originalFormatVersion": "1.0"
+}
