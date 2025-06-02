@@ -1,0 +1,38 @@
+#%RAML 1.0
+title: equifax-report-api
+
+description: |
+  #### This system api connects to the ID Report API product of Equifax.  
+
+  #### The system api verifies identities or locate debtors when only name and address are available. 
+
+  #### Returns matching name, known aliases or former names, Social Security number (if included), age or date of birth, current and former addresses and emplyment information.
+  
+
+traits:
+  client-id-required: !include exchange_modules/4272df4c-8e68-4f90-86ff-dbdb04192bf9/client-credential-fragment/1.0.1/client-credential-fragment.raml
+
+/idReport:
+  post:
+    description: Requests and retrieves a consumer ID report from Equifax
+    is:
+      - client-id-required
+    body:
+      application/json:
+        description: object with the fields consumers, customerReferenceIdentifier, and customerConfigurations
+        type: !include DataTypes/dataType.raml
+        examples: !include Examples/request-example.raml
+    responses:
+      200:
+        description: OK
+        headers:
+          efx-transaction-id:
+              description: A GUID value assigned to this transaction by Equifax.
+        body:
+          application/json:
+            example: !include Examples/response-example.raml
+              
+
+                        
+            
+        

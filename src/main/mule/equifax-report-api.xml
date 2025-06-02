@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+    <http:listener-config name="equifax-report-api-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="8081" />
+    </http:listener-config>
+    <apikit:config name="equifax-report-api-config" api="equifax-report-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <http:request-config name="Equifax_RequestReport_configuration" doc:name="HTTP Request configuration" doc:id="d4e9d772-06a1-4305-b6b0-1a5c8e5327a9" basePath="/business/id-report/v1">
+		<http:request-connection host="api.sandbox.equifax.com" protocol="HTTPS"/>
+	</http:request-config>
+	<http:request-config name="Access_Token_Request_configuration" doc:name="HTTP Request configuration" doc:id="91ee0cc6-0eab-4701-a9a3-8f8341459c1a" basePath="/v2/oauth/">
+		<http:request-connection protocol="HTTPS" host="api.sandbox.equifax.com" />
+	</http:request-config>
+	<os:object-store name="Object_store" doc:name="Object store" doc:id="f5a07cfd-9bc1-4f0f-8a9c-867e9f88420e" entryTtl="1800" />
+	<flow name="equifax-report-api-main">
+        <http:listener config-ref="equifax-report-api-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="equifax-report-api-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	error: "BAD REQUEST",
+	message: error.detailedDescription
+}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="equifax-report-api-console">
+        <http:listener config-ref="equifax-report-api-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="equifax-report-api-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="post:\idReport:application\json:equifax-report-api-config">
+		<set-variable value="#[import toBase64 from dw::core::Binaries&#10;---&#10;toBase64(attributes.headers.'client-id' &#10;	++ &quot;:&quot; ++ attributes.headers.'client-secret'&#10;)]" doc:name="Store ClientCreds" doc:id="6b43ff5c-5aef-4c97-b011-d7e831b03f31" variableName="clientCreds" />
+		<set-variable value="#[payload]" doc:name="Store Payload" doc:id="3c05d86a-6f90-4ade-9695-9b38d75f7d7e" variableName="storePayload" />
+		<os:contains doc:name="Contains" doc:id="a756de00-aeb3-4e63-9c06-a97c259bebb9" key="#[vars.clientCreds]" objectStore="Object_store"/>
+		<choice doc:name="Choice" doc:id="033b2a48-85e2-4d1b-aa05-a3026677c2cb" >
+			<when expression="#[payload == true]">
+				<os:retrieve doc:name="Retrieve" doc:id="1cfeecde-af94-449b-a417-a998b48472ac" key="#[vars.clientCreds]" objectStore="Object_store"/>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="c6081acd-96a5-4805-bab8-d7764a24c2ce">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload as String]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<logger level="INFO" doc:name="Logger" doc:id="2f8fc657-8d53-4a6b-8bcb-6b9fbc5b2358" message="#['Empty Object Store']" />
+			</otherwise>
+		</choice>
+		<set-variable value="#[payload]" doc:name="Access Token" doc:id="61a69a97-5bb9-4a48-aa87-c26ca3153b40" variableName="accessToken" />
+		<flow-ref doc:name="Flow Reference" doc:id="636cae33-3822-41f1-9322-d2d1e8f50343" name="equifax-report-apiSub_Flow"/>
+    </flow>
+	<sub-flow name="equifax-report-apiSub_Flow" doc:id="59b8c970-32c9-4d0e-b3af-b913de078457" >
+		<try doc:name="Try" doc:id="5d78195d-a9db-4145-8c0e-270500b51aad" >
+			<http:request method="POST" doc:name="Get Records" doc:id="842dcb88-f9e0-4a2c-9a23-4641fadbbb52" config-ref="Equifax_RequestReport_configuration" path="/report-requests">
+			<http:headers><![CDATA[#[output application/java
+---
+{
+	"Authorization" : "Bearer " ++ vars.accessToken,
+	"Content-Type" : "application/json"
+}]]]></http:headers>
+		</http:request>
+			<error-handler>
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="3e7f81d1-985f-4f35-8460-871937621326" type="HTTP:UNAUTHORIZED">
+					<http:request method="POST" doc:name="Get_Token" doc:id="2cb8dfa4-8b66-4f23-8094-e8c6ba9c1c0a" config-ref="Access_Token_Request_configuration" path="/token">
+						<http:body><![CDATA[grant_type=client_credentials]]></http:body>
+						<http:headers><![CDATA[#[import toBase64 from dw::core::Binaries
+output application/json
+---
+{
+	"Authorization" : "Basic " ++ vars.clientCreds
+	
+}]]]></http:headers>
+					</http:request>
+					<set-variable value="#[payload.access_token]" doc:name="Access Token" doc:id="0db4f35f-f770-49ec-b851-dd2b33b13232" variableName="accessToken" />
+					<os:store doc:name="Store" doc:id="137b34ff-5f37-445f-9409-e7b4bd8e38ce" key="vars.clientCreds" objectStore="Object_store">
+					<os:value><![CDATA[#[vars.accessToken]]]></os:value>
+				</os:store>
+					<set-payload value="#[vars.storePayload]" doc:name="Set Payload" doc:id="6759b065-fb86-4148-99e2-c8a8fd48ea9e" />
+					<flow-ref doc:name="Flow Reference" doc:id="57602243-a268-427f-af5c-0525797be6ba" name="equifax-report-apiSub_Flow" />
+				</on-error-continue>
+			</error-handler>
+		</try>
+	</sub-flow>
+</mule>

@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_59b8c970_32c9_4d0e_b3af_b913de078457_Input_Variables_outboundHeaders = {| "efx-transaction-id": String |}
+
