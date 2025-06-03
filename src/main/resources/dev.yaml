@@ -1,0 +1,13 @@
+list:
+  host: 'localhost'
+  port: '8081'
+
+efx:
+  host: 'api.sandbox.equifax.com'
+  
+  tokenBaseUrl: '/v2/oauth'
+  tokenPath: '/token'
+  
+  reportBaseUrl: '/business/id-report/v1'
+  reportPath: '/report-requests'
+ 

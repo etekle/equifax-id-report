@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+    
+    <flow name="equifax-report-api-main">
+        <http:listener config-ref="equifax-report-sapi-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="equifax-report-api-config" />
+       
+    </flow>
+    <flow name="equifax-report-api-console">
+        <http:listener config-ref="equifax-report-sapi-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="equifax-report-api-config" />
+    </flow>
+    <flow name="get:\token:equifax-report-api-config">
+		<http:request method="POST" doc:name="Get_Token" doc:id="5ebfb421-dc35-4c20-9f2c-2e8c7b62bf18" config-ref="Access_Token_Request_configuration" path="${efx.tokenPath}" >
+			<http:body ><![CDATA[grant_type=client_credentials]]></http:body>
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Authorization" : attributes.headers.authorization
+}]]]></http:headers>
+		</http:request>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="1f3f094a-fc82-4310-9ee1-a031ca7a008c" type="HTTP:BAD_REQUEST">
+				<ee:transform doc:name="Transform Message" doc:id="134ce3b8-67c7-42f8-8a85-c37b2d57d25f" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var errors = error.errorMessage
+---
+{
+ "errorCode": errors.attributes.reasonPhrase,
+	"statusCode": errors.attributes.statusCode,
+	"efxErrorCode": errors.payload.error,
+	"errorDescription": errors.payload.error_description
+	
+}
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+    </flow>
+    <flow name="post:\idReport:application\json:equifax-report-api-config">
+		<http:request method="POST" doc:name="Get Records" doc:id="f08ed955-d18d-4316-9b55-af6c8d58fe9d" config-ref="Equifax_RequestReport_configuration" path="${efx.reportPath}" >
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Authorization" : attributes.headers.Authorization,
+	"Content-Type" : "application/json"
+}]]]></http:headers>
+		</http:request>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="b1f22c89-2f64-47dc-812b-9cee3c0ca204" type="HTTP:UNAUTHORIZED">
+				<ee:transform doc:name="Transform Message" doc:id="921dd061-5716-4462-93ef-ce63bf002723" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var errors = error.errorMessage
+---
+{
+	"errorCode": errors.attributes.reasonPhrase,
+	"statusCode": errors.attributes.statusCode,
+	"efxErrorCode": errors.payload.efxErrorCode,
+	"errorDescription": errors.payload.description
+	
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+    </flow>
+</mule>

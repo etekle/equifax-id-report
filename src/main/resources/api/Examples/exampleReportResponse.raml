@@ -1,0 +1,103 @@
+#%RAML 1.0 NamedExample
+response-example:
+  {
+    "status": "completed",
+    "consumers": {
+        "equifaxIDReport": [
+            {
+                "identifier": "Individual Report 1",
+                "customerReferenceNumber": "2C800002-DOR7",
+                "customerNumber": "999XX12345",
+                "consumerReferralCode": 347,
+                "multipleReportIndicator": 1,
+                "ECOAInquiryType": "I",
+                "hitCode": {
+                    "code": 6,
+                    "description": "Hit and Automated Consumer Narrative"
+                },
+                "fileSinceDate": "02082003",
+                "lastActivityDate": "06102021",
+                "reportDate": "08242021",
+                "subjectName": {
+                    "firstName": "LJBKFJ",
+                    "lastName": "KHJGUFJM",
+                    "middleName": "X"
+                },
+                "subjectSocialNum": 666123456,
+                "birthDate": "06061966",
+                "addressDiscrepancyIndicator": "N",
+                "fraudSocialNumAlertCode": [
+                    {
+                        "code": "N",
+                        "description": "No Alert available"
+                    }
+                ],
+                "fraudIDScanAlertCodes": [
+                    {
+                        "code": 8,
+                        "description": "UNABLE TO PERFORM TELEPHONE VALIDATION DUE TO INSUFFICIENT TELEPHONE INPUT"
+                    },
+                    {
+                        "code": "L",
+                        "description": "FRAUD VICTIM ALERT PRESENT IN DATABASE"
+                    }
+                ],
+                "fraudVictimIndicator": {
+                    "code": "X",
+                    "description": "Fraud Victim Extended Alert"
+                },
+                "addresses": [
+                    {
+                        "addressType": "current",
+                        "houseNumber": 123,
+                        "streetName": "POIBHHFJD",
+                        "streetType": "ST",
+                        "cityName": "ATLANTA",
+                        "stateAbbreviation": "GA",
+                        "zipCode": 30374,
+                        "sourceOfAddress": {
+                            "code": "T",
+                            "description": "AUT**"
+                        },
+                        "dateFirstReported": "05002021",
+                        "dateLastReported": "06122021",
+                        "addressLine1": "123 POIBHHFJD ST"
+                    },
+                    {
+                        "addressType": "former",
+                        "houseNumber": 456,
+                        "streetName": "POYUFHJ",
+                        "streetType": "LN",
+                        "cityName": "ATLANTA",
+                        "stateAbbreviation": "GA",
+                        "zipCode": 30374,
+                        "rentOwnBuy": "R",
+                        "sourceOfAddress": {
+                            "code": "T",
+                            "description": "AUT**"
+                        },
+                        "dateFirstReported": "02002020",
+                        "dateLastReported": "06112021",
+                        "addressLine1": "456 POYUFHJ LN"
+                    }
+                ],
+                "employments": [
+                    {
+                        "identifier": "current",
+                        "employer": "GFDDHGLGKHGKHJG LHJLH"
+                    },
+                    {
+                        "identifier": "former",
+                        "employer": "KUYTYECJH LHKGJGJ KGH"
+                    }
+                ],
+                "identification": {
+                    "subjectSocialNum": 666123456,
+                    "inquirySocialNum": 666123456,
+                    "inquirySocialNumStateIssued": "GA",
+                    "inquirySocialNumYearIssued": 2007
+                }
+            }
+        ]
+    }
+}

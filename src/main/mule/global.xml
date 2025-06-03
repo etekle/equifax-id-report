@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	
+	<http:listener-config name="equifax-report-sapi-httpListenerConfig">
+        <http:listener-connection host="${list.host}" port="${list.port}" />
+    </http:listener-config>
+    <apikit:config name="equifax-report-api-config" api="equifax-report-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+	 <http:request-config name="Equifax_RequestReport_configuration" doc:name="HTTP Request configuration" doc:id="647ce4b8-ee6a-4923-86d6-1822a079c615" basePath="${efx.reportBaseUrl}">
+		<http:request-connection host="${efx.host}" protocol="HTTPS"/>
+	</http:request-config>
+	<http:request-config name="Access_Token_Request_configuration" doc:name="HTTP Request configuration" doc:id="eae4e094-12f5-48d7-8639-ea8fe2c2b2cb" basePath="${efx.tokenBaseUrl}">
+		<http:request-connection protocol="HTTPS" host="${efx.host}" />
+	</http:request-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="30decd73-3d2b-41ad-94ce-de6e27cda90d" file="dev.yaml" />
+
+</mule>
