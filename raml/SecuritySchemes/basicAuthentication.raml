@@ -1,0 +1,9 @@
+#%RAML 1.0 SecurityScheme
+type: Basic Authentication
+describedBy:
+  headers:
+    Authorization:
+      description: Basic authentication with base64(client-id:client-secret)
+      type: string
+      minLength: 1
+      required: true

@@ -1,0 +1,9 @@
+#%RAML 1.0 SecurityScheme
+type: OAuth 2.0
+describedBy:
+  headers:
+    Authorization:
+      description: Bearer token for OAuth 2.0
+      type: string
+      minLength: 8
+      required: true
