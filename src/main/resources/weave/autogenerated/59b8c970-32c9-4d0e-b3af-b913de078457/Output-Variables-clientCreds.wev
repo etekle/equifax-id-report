@@ -1,7 +1,0 @@
-%dw 2.0
-
-type auto_59b8c970_32c9_4d0e_b3af_b913de078457_Output_Variables_clientCreds = {|
-  "client-id": String, 
-  "client-secret": String
-|}
-
